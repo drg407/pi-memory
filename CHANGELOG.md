@@ -6,6 +6,14 @@ follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed (fork: drg407/pi-memory, tag ages-2)
+
+- Merged upstream `main` through 1e276a7 (clean, no conflicts). Brings in the
+  post-0.4.2 upstream features: snapshot `refresh` mode,
+  `PI_MEMORY_EXIT_SUMMARY_REASONING_EFFORT`, `PI_MEMORY_EMBED_PROBE_TIMEOUT_MS`,
+  and immediate stable-snapshot refresh on `memory_forget`/`memory_restore`.
+  The fork delta is unchanged and tsc + the memory-ages battery re-verified.
+
 ### Added (fork: drg407/pi-memory, branch `ages`, base v0.4.2)
 
 - Memory-age annotation: every entry stamp in the injected context
