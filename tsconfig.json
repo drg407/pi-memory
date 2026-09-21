@@ -7,6 +7,7 @@
 		"types": ["node"],
 		"strict": true,
 		"skipLibCheck": true,
+		"allowImportingTsExtensions": true,
 		"noEmit": true
 	},
 	"include": ["index.ts", "test/e2e.ts"]

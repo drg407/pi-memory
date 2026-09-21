@@ -37,6 +37,8 @@ import {
 	serializeConversation,
 } from "@earendil-works/pi-coding-agent";
 
+import { annotateMemoryAges } from "./memory-ages.ts";
+
 // ---------------------------------------------------------------------------
 // Paths (mutable for testing via _setBaseDir / _resetBaseDir)
 // ---------------------------------------------------------------------------
@@ -786,7 +788,7 @@ export function buildMemoryContext(searchResults?: string): string {
 	if (scratchpad?.trim()) {
 		const openItems = parseScratchpad(scratchpad).filter((i) => !i.done);
 		if (openItems.length > 0) {
-			const serialized = serializeScratchpad(openItems);
+			const serialized = annotateMemoryAges(serializeScratchpad(openItems));
 			const section = formatContextSection(
 				"## SCRATCHPAD.md (working context)",
 				serialized,
@@ -805,7 +807,7 @@ export function buildMemoryContext(searchResults?: string): string {
 	if (todayContent?.trim()) {
 		const section = formatContextSection(
 			`## Daily log: ${today} (today)`,
-			todayContent,
+			annotateMemoryAges(todayContent),
 			"end",
 			CONTEXT_DAILY_MAX_LINES,
 			CONTEXT_DAILY_MAX_CHARS,
@@ -828,7 +830,7 @@ export function buildMemoryContext(searchResults?: string): string {
 	if (longTerm?.trim()) {
 		const section = formatContextSection(
 			"## MEMORY.md (long-term)",
-			longTerm,
+			annotateMemoryAges(longTerm),
 			"middle",
 			CONTEXT_LONG_TERM_MAX_LINES,
 			CONTEXT_LONG_TERM_MAX_CHARS,
@@ -840,7 +842,7 @@ export function buildMemoryContext(searchResults?: string): string {
 	if (yesterdayContent?.trim()) {
 		const section = formatContextSection(
 			`## Daily log: ${yesterday} (yesterday)`,
-			yesterdayContent,
+			annotateMemoryAges(yesterdayContent),
 			"end",
 			CONTEXT_DAILY_MAX_LINES,
 			CONTEXT_DAILY_MAX_CHARS,

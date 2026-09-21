@@ -6,6 +6,16 @@ follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added (fork: drg407/pi-memory, branch `ages`, base v0.4.2)
+
+- Memory-age annotation: every entry stamp in the injected context
+  (SCRATCHPAD.md, daily logs, MEMORY.md) gets a pre-computed human-readable
+  age inside its comment, e.g. `<!-- 2026-09-08 19:46:46 [01a08344] (13d old)
+  -->`. Models are poor at date arithmetic; the age is rendered instead of
+  leaving freshness to the model's subtraction. In-memory only — source files
+  are never rewritten. New pure module `memory-ages.ts` + 4 call sites in
+  `buildMemoryContext`; hostile-input battery in `test/memory-ages.ts`
+  (`node test/memory-ages.ts`, plus `--red` mutation check).
 ## [0.4.2] — 2026-08-10
 
 ### Added

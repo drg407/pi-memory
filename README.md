@@ -31,6 +31,22 @@ $ cat ~/.pi/agent/memory/MEMORY.md
 #preference [[package-manager]] Always use pnpm in this repo, never npm.
 ```
 
+## Fork notes
+
+This is a fork of [jayzeng/pi-memory](https://github.com/jayzeng/pi-memory)
+(base tag `v0.4.2`, branch `ages`). The only delta is the memory-age
+annotation described in the changelog: injected memory stamps carry a
+pre-computed age so the model doesn't do date arithmetic. No other behavior
+changed; upstream features merged into main after `v0.4.2` are NOT included
+here. Upstream releases are merged into the `ages` branch by hand; nothing is
+submitted upstream.
+
+Install this fork instead of the npm package with:
+
+```bash
+pi install git:github.com/drg407/pi-memory@ages-1
+```
+
 ## Installation
 
 ```bash
