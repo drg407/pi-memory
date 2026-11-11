@@ -577,6 +577,16 @@ describe("buildMemoryContext", () => {
 		expect(ctx).not.toContain("Done item");
 	});
 
+	test("scratchpad over the injection cap keeps the NEWEST items (tail), drops the oldest", () => {
+		ensureDirs();
+		const filler = "x".repeat(150);
+		const lines = Array.from({ length: 30 }, (_, i) => `- [ ] item-${String(i).padStart(2, "0")} ${filler}`);
+		fs.writeFileSync(path.join(tmpDir, "SCRATCHPAD.md"), `# Scratchpad\n\n${lines.join("\n")}\n`, "utf-8");
+		const ctx = buildMemoryContext();
+		expect(ctx).toContain("item-29");
+		expect(ctx).not.toContain("item-00");
+	});
+
 	test("excludes scratchpad section when all items are done", () => {
 		ensureDirs();
 		const content = "# Scratchpad\n\n- [x] Done item\n";
@@ -936,6 +946,21 @@ describe("scratchpad tool", () => {
 		const content = fs.readFileSync(path.join(tmpDir, "SCRATCHPAD.md"), "utf-8");
 		expect(content).toContain("Fix login bug");
 		expect(content).toContain("[ ]");
+	});
+
+	test("add warns when open items exceed the injection cap", async () => {
+		const ctx = createMockCtx();
+		const filler = "y".repeat(150);
+		const lines = Array.from({ length: 20 }, (_, i) => `- [ ] old-${i} ${filler}`);
+		fs.writeFileSync(path.join(tmpDir, "SCRATCHPAD.md"), `# Scratchpad\n\n${lines.join("\n")}\n`, "utf-8");
+		const result = await tools.scratchpad.execute("c1", { action: "add", text: "new item" }, null, null, ctx);
+		expect(result.content[0].text).toContain("over the 2000-char injection cap");
+	});
+
+	test("add does not warn when open items fit the injection cap", async () => {
+		const ctx = createMockCtx();
+		const result = await tools.scratchpad.execute("c1", { action: "add", text: "small item" }, null, null, ctx);
+		expect(result.content[0].text).not.toContain("injection cap");
 	});
 
 	test("add without text returns error", async () => {

@@ -637,6 +637,15 @@ interface RecoveryRecord {
 	restoredAt?: string;
 }
 
+/** Warning appended to scratchpad tool replies when open items no longer fit the injection cap. */
+export function scratchpadOverflowNote(content: string): string {
+	const open = parseScratchpad(content).filter((i) => !i.done);
+	if (open.length === 0) return "";
+	const size = serializeScratchpad(open).length;
+	if (size <= CONTEXT_SCRATCHPAD_MAX_CHARS) return "";
+	return `\n\nWarning: open scratchpad items are ${size} chars, over the ${CONTEXT_SCRATCHPAD_MAX_CHARS}-char injection cap. Only the newest fit in context; the oldest are hidden from future turns. Mark finished items done, or archive stale ones to memory/archive/.`;
+}
+
 export function scratchpadAdd(content: string, text: string, meta: string): string {
 	if (!content.trim()) {
 		return serializeScratchpad([{ done: false, text, meta }]);
@@ -811,7 +820,8 @@ export function buildMemoryContext(searchResults?: string): string {
 			const section = formatContextSection(
 				"## SCRATCHPAD.md (working context)",
 				serialized,
-				"start",
+				// Items are appended, so the tail holds the newest: keep it, drop the oldest.
+				"end",
 				CONTEXT_SCRATCHPAD_MAX_LINES,
 				CONTEXT_SCRATCHPAD_MAX_CHARS,
 			);
@@ -1884,7 +1894,7 @@ export default function (pi: ExtensionAPI) {
 					content: [
 						{
 							type: "text",
-							text: `Added: - [ ] ${text}\n\n${formatPreviewBlock("Scratchpad preview", serialized, "start")}`,
+							text: `Added: - [ ] ${text}\n\n${formatPreviewBlock("Scratchpad preview", serialized, "start")}${scratchpadOverflowNote(serialized)}`,
 						},
 					],
 					details: {
