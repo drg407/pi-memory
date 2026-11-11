@@ -16,8 +16,6 @@
 // battery (run: node test/memory-ages.ts).
 // ---------------------------------------------------------------------------
 
-const STAMP_TIMESTAMP_REGEX = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
-
 /**
  * Human-readable age label for a timestamp, relative to `nowMs`.
  * Future timestamps (clock skew) clamp to "just now" — never a negative age.

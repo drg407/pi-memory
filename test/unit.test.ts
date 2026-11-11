@@ -2587,3 +2587,32 @@ describe("probeEmbeddings", () => {
 		expect(await probeEmbeddings()).toBe("unknown");
 	}, 10_000);
 });
+
+// ---------------------------------------------------------------------------
+// Cross-process write race: two writers appending concurrently must not lose
+// each other's entries (memory_write used to read the whole file and rewrite it).
+// ---------------------------------------------------------------------------
+describe("memory_write cross-process race", () => {
+	for (const target of ["daily", "long_term"] as const) {
+		test(`two concurrent writers keep every ${target} entry`, async () => {
+			const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-mem-race-"));
+			const writer = path.join(import.meta.dir, "race-writer.ts");
+			const N = 60;
+			const procs = ["A", "B"].map((id) =>
+				Bun.spawn(["bun", writer, dir, id, String(N), target], { stdout: "ignore", stderr: "pipe" }),
+			);
+			const codes = await Promise.all(procs.map((p) => p.exited));
+			expect(codes).toEqual([0, 0]);
+			const file =
+				target === "daily"
+					? path.join(dir, "daily", fs.readdirSync(path.join(dir, "daily"))[0])
+					: path.join(dir, "MEMORY.md");
+			const text = fs.readFileSync(file, "utf-8");
+			const missing: string[] = [];
+			for (const id of ["A", "B"])
+				for (let i = 0; i < N; i++)
+					if (!text.includes(`W${id}-${i}\n`) && !text.endsWith(`W${id}-${i}`)) missing.push(`W${id}-${i}`);
+			expect(missing).toEqual([]);
+		}, 60_000);
+	}
+});

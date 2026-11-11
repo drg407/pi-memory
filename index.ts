@@ -807,6 +807,20 @@ function readRecoveryRecord(recoveryId: string): { record: RecoveryRecord; fileP
 // Context builder
 // ---------------------------------------------------------------------------
 
+/** Append one stamped entry with a single O_APPEND write, so concurrent writers (two pi
+ *  sessions, a subagent) never overwrite each other's entries. The read-whole-file-then-
+ *  rewrite it replaced lost ~half the entries under a two-process race (2026-11-11). */
+function appendEntry(filePath: string, stamped: string): void {
+	let size = 0;
+	try {
+		size = fs.statSync(filePath).size;
+	} catch {
+		size = 0;
+	}
+	// Every entry ends with "\n", so even two racing first entries never glue together.
+	fs.appendFileSync(filePath, `${size > 0 ? "\n" : ""}${stamped}\n`, "utf-8");
+}
+
 export function buildMemoryContext(searchResults?: string): string {
 	ensureDirs();
 	// Priority order: scratchpad > today's daily > search results > MEMORY.md > yesterday's daily
@@ -1734,9 +1748,8 @@ export default function (pi: ExtensionAPI) {
 					? `\n\n${formatPreviewBlock("Existing daily log preview", existing, "end")}`
 					: "\n\nDaily log was empty.";
 
-				const separator = existing.trim() ? "\n\n" : "";
 				const stamped = `<!-- ${ts} [${sid}] -->\n${content}`;
-				fs.writeFileSync(filePath, existing + separator + stamped, "utf-8");
+				appendEntry(filePath, stamped);
 				await ensureQmdAvailableForUpdate();
 				scheduleQmdUpdate();
 				return {
@@ -1795,9 +1808,8 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			// append (default)
-			const separator = existing.trim() ? "\n\n" : "";
 			const stamped = `<!-- ${ts} [${sid}] -->\n${content}`;
-			fs.writeFileSync(MEMORY_FILE, existing + separator + stamped, "utf-8");
+			appendEntry(MEMORY_FILE, stamped);
 			await ensureQmdAvailableForUpdate();
 			scheduleQmdUpdate();
 			return {
