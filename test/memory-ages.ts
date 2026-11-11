@@ -60,8 +60,7 @@ check("label: FUTURE stamp clamps to just now (no negative)", memoryAgeLabel(NOW
 // --- annotateMemoryAges: positive cases ---
 check(
 	"annotates plain stamp",
-	annotateMemoryAges(stamp("2026-09-18 06:00:00"), NOW) ===
-		"<!-- 2026-09-18 06:00:00 [01a0test] (3d old) -->",
+	annotateMemoryAges(stamp("2026-09-18 06:00:00"), NOW) === "<!-- 2026-09-18 06:00:00 [01a0test] (3d old) -->",
 );
 check(
 	"annotates 'last updated:' stamp",
@@ -75,8 +74,7 @@ check(
 );
 check(
 	"future stamp → just now, never negative",
-	annotateMemoryAges(stamp("2026-09-22 12:00:00"), NOW) ===
-		"<!-- 2026-09-22 12:00:00 [01a0test] (just now) -->",
+	annotateMemoryAges(stamp("2026-09-22 12:00:00"), NOW) === "<!-- 2026-09-22 12:00:00 [01a0test] (just now) -->",
 );
 const multi = [stamp("2026-09-01 00:00:00"), "body line", stamp("2026-09-21 00:00:00")].join("\n");
 check(
@@ -89,15 +87,41 @@ check(
 check("empty string → unchanged", annotateMemoryAges("", NOW) === "");
 check("whitespace-only → unchanged", annotateMemoryAges("   \n  ", NOW) === "   \n  ");
 check("no stamps → unchanged", annotateMemoryAges("just text\nand more", NOW) === "just text\nand more");
-check("indented stamp (quoted line) untouched", annotateMemoryAges(`\t${stamp("2026-09-01 00:00:00")}`, NOW) === `\t${stamp("2026-09-01 00:00:00")}`);
-check("stamp missing session id untouched", annotateMemoryAges("<!-- 2026-09-01 00:00:00 -->", NOW) === "<!-- 2026-09-01 00:00:00 -->");
-check("month 13 (rolled-over) untouched", annotateMemoryAges(stamp("2026-13-01 00:00:00"), NOW) === stamp("2026-13-01 00:00:00"));
-check("day 45 (rolled-over) untouched", annotateMemoryAges(stamp("2026-09-45 00:00:00"), NOW) === stamp("2026-09-45 00:00:00"));
-check("hour 99 (rolled-over) untouched", annotateMemoryAges(stamp("2026-09-01 99:00:00"), NOW) === stamp("2026-09-01 99:00:00"));
-check("year 0000 (rolled-over) untouched", annotateMemoryAges(stamp("0000-01-01 00:00:00"), NOW) === stamp("0000-01-01 00:00:00"));
+check(
+	"indented stamp (quoted line) untouched",
+	annotateMemoryAges(`\t${stamp("2026-09-01 00:00:00")}`, NOW) === `\t${stamp("2026-09-01 00:00:00")}`,
+);
+check(
+	"stamp missing session id untouched",
+	annotateMemoryAges("<!-- 2026-09-01 00:00:00 -->", NOW) === "<!-- 2026-09-01 00:00:00 -->",
+);
+check(
+	"month 13 (rolled-over) untouched",
+	annotateMemoryAges(stamp("2026-13-01 00:00:00"), NOW) === stamp("2026-13-01 00:00:00"),
+);
+check(
+	"day 45 (rolled-over) untouched",
+	annotateMemoryAges(stamp("2026-09-45 00:00:00"), NOW) === stamp("2026-09-45 00:00:00"),
+);
+check(
+	"hour 99 (rolled-over) untouched",
+	annotateMemoryAges(stamp("2026-09-01 99:00:00"), NOW) === stamp("2026-09-01 99:00:00"),
+);
+check(
+	"year 0000 (rolled-over) untouched",
+	annotateMemoryAges(stamp("0000-01-01 00:00:00"), NOW) === stamp("0000-01-01 00:00:00"),
+);
 check("non-stamp comment untouched", annotateMemoryAges("<!-- note -->", NOW) === "<!-- note -->");
-check("stamp embedded mid-line untouched", annotateMemoryAges(`see ${stamp("2026-09-01 00:00:00")} inline`, NOW) === `see ${stamp("2026-09-01 00:00:00")} inline`);
-check("already-annotated line cannot stack (rejected)", annotateMemoryAges("<!-- 2026-09-01 00:00:00 [01a0test] (3w old) -->", NOW) === "<!-- 2026-09-01 00:00:00 [01a0test] (3w old) -->");
+check(
+	"stamp embedded mid-line untouched",
+	annotateMemoryAges(`see ${stamp("2026-09-01 00:00:00")} inline`, NOW) ===
+		`see ${stamp("2026-09-01 00:00:00")} inline`,
+);
+check(
+	"already-annotated line cannot stack (rejected)",
+	annotateMemoryAges("<!-- 2026-09-01 00:00:00 [01a0test] (3w old) -->", NOW) ===
+		"<!-- 2026-09-01 00:00:00 [01a0test] (3w old) -->",
+);
 
 console.log(`\n${pass}/${pass + fail} passed, ${fail} failed${RED_FLAG ? " (RED MODE — failures expected)" : ""}`);
 process.exit(RED_FLAG ? (fail > 0 ? 0 : 1) : fail === 0 ? 0 : 1);
